@@ -31,7 +31,7 @@ device = None
 # import logger
 
 parser = configargparse.ArgParser(description='myTorchClassify')
-parser.add_argument('--data_name', type=str, default='MNIST',
+parser.add_argument('--data_name', type=str, default='CIFAR10',
                     help='data name: hymenoptera_data, CIFAR10, flower_photos')
 parser.add_argument('--data_type', default='torchvisiondataset', choices=['trainvalfolder', 'traintestfolder', 'torchvisiondataset'],
                     help='the type of data') 
@@ -44,7 +44,7 @@ parser.add_argument('--img_width', type=int, default=28,
 parser.add_argument('--save_path', type=str, default='./outputs/',
                     help='path to save the model')
 # network
-parser.add_argument('--model_name', default='lenet', choices=['mlpmodel1', 'lenet', 'resnetmodel1', 'vggmodel1', 'cnnmodel1'],
+parser.add_argument('--model_name', default='mobilenet', choices=['mlpmodel1', 'lenet', 'resnetmodel1', 'vggmodel1', 'cnnmodel1'],
                     help='the network')
 parser.add_argument('--arch', default='Pytorch', choices=['Tensorflow', 'Pytorch'],
                     help='Model Name, default: Pytorch.')
@@ -195,6 +195,7 @@ def main():
     model_ft = createTorchCNNmodel(args.model_name, numclasses, img_shape)
 
     modelpath=os.path.join(args.save_path, 'model_best.pt')
+    print("modelpath ", modelpath)
     model_ft.load_state_dict(torch.load(modelpath))
 
     model_ft = model_ft.to(device)
@@ -243,7 +244,7 @@ def main():
         incorrect_examples.sort(reverse = True, key = lambda x: torch.max(x[2], dim = 0).values)
         
         N_IMAGES = 25
-        plot_most_incorrect(incorrect_examples, N_IMAGES)
+        # plot_most_incorrect(incorrect_examples, N_IMAGES)
 
 
 #plot the examples the model got wrong and was most confident about.
@@ -296,7 +297,7 @@ def evaluate(model, iterator, criterion, device):
             x = x.to(device)
             y = y.to(device)
 
-            y_pred, _ = model(x)
+            y_pred = model(x)
 
             loss = criterion(y_pred, y)
 
@@ -322,7 +323,7 @@ def get_predictions(model, iterator, device):
 
             x = x.to(device)
 
-            y_pred, _ = model(x)
+            y_pred = model(x)
 
             y_prob = F.softmax(y_pred, dim = -1)
             top_pred = y_prob.argmax(1, keepdim = True)

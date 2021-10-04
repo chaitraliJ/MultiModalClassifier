@@ -47,7 +47,7 @@ parser.add_argument('--img_width', type=int, default=28,
 parser.add_argument('--save_path', type=str, default='./outputs/',
                     help='path to save the model')
 # network
-parser.add_argument('--model_name', default='alexnet', choices=['mlpmodel1', 'lenet', 'alexnet', 'resnetmodel1', 'customresnet', 'vggmodel1', 'vggcustom', 'cnnmodel1'],
+parser.add_argument('--model_name', default='mobilenet', choices=['mlpmodel1', 'lenet', 'alexnet', 'resnetmodel1', 'customresnet', 'vggmodel1', 'vggcustom', 'cnnmodel1'],
                     help='the network')
 parser.add_argument('--arch', default='Pytorch', choices=['Tensorflow', 'Pytorch'],
                     help='Model Name, default: Pytorch.')
@@ -226,16 +226,18 @@ def main():
     criterion = criterion.to(device)
 
     # Observe that all parameters are being optimized, 
-    optimizer_ft=gettorchoptim(args.optimizer, model_ft) #'Adam'
-    # optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+    # optimizer_ft=gettorchoptim(args.optimizer, model_ft) #'Adam'
+    optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
     # optimizer_ft = optim.Adam(model_ft.parameters())
 
     # # Decay LR by a factor of 0.1 every 7 epochs
-    # exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+    # exp_lr_scheduler = lr_scheduler.ExponentialLR(optimizer_ft, gamma=0.9)
+    # step_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+    step_lr_scheduler = lr_scheduler.MultiStepLR(optimizer_ft, milestones=[30,80], gamma=0.1)
     STEPS_PER_EPOCH = len(dataloaders['train'])
-    lr_scheduler = setupLearningratescheduler(args.learningratename, optimizer_ft, args.epochs, STEPS_PER_EPOCH)
+    # lr_scheduler = setupLearningratescheduler(args.learningratename, optimizer_ft, args.epochs, STEPS_PER_EPOCH)
 
-    model_ft = train_model(model_ft, dataloaders, dataset_sizes, criterion, optimizer_ft, lr_scheduler,
+    model_ft = train_model(model_ft, dataloaders, dataset_sizes, criterion, optimizer_ft, step_lr_scheduler,
                        num_epochs=args.epochs)
 
     #save torch model
