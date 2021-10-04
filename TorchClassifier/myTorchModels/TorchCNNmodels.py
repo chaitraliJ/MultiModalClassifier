@@ -26,6 +26,8 @@ def createTorchCNNmodel(name, numclasses, img_shape):
         return create_resnetmodel1(numclasses, img_shape)
     elif name=='customresnet':
         return setupCustomResNet(numclasses, 'resnet50')
+    elif name=='mobilenet' :
+        return create_mobileNetmodel1(numclasses, img_shape)
 
 def create_vggmodel1(numclasses, img_shape):
     # Load the pretrained model from pytorch
@@ -48,7 +50,8 @@ def create_vggmodel1(numclasses, img_shape):
     last_layer = nn.Linear(n_inputs, numclasses)
 
     vgg16.classifier[6] = last_layer
-    
+    return vgg16
+
 class VGG(nn.Module):
     def __init__(self, features, output_dim):
         super().__init__()
@@ -122,6 +125,8 @@ def create_vggcustommodel(numclasses, img_shape):
     #We could also freeze the classifier layer, however we always want to train the last layer
     for parameter in model.classifier[:-1].parameters():
         parameter.requires_grad = False
+    
+    return pretrained_model
 
 def get_vgg_layers(config, batch_norm):
 
@@ -374,4 +379,11 @@ def create_resnetmodel1(numclasses, img_shape):
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
     model_ft.fc = nn.Linear(num_ftrs, numclasses)
+    return model_ft
+
+def create_mobileNetmodel1(numclasses, img_shape):
+    model_ft = models.mobilenet_v2(pretrained=True)
+    # num_ftrs = model_ft.fc.in_features #512
+    # print(num_ftrs)
+    # model_ft.fc = nn.Linear(num_ftrs, numclasses)
     return model_ft
